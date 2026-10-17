@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Match media — Jellyfin NFO Matcher</title>
+  <style>
+    body { max-width: 860px; margin: 2rem auto; padding: 0 1rem; font: 16px/1.5 system-ui, sans-serif; }
+    .path { overflow-wrap: anywhere; }
+    .notice { padding: .8rem; background: #edf5ff; }
+    .error { padding: .8rem; background: #fff0f0; color: #8b1010; }
+    .candidate { border: 1px solid #ccc; border-radius: 6px; margin: 1rem 0; padding: 1rem; }
+    .muted { color: #555; }
+    button { padding: .45rem .8rem; cursor: pointer; }
+    input[type="text"] { box-sizing: border-box; padding: .5rem; width: min(100%, 32rem); }
+  </style>
+</head>
+<body>
+  <p><a href="/">← All media</a></p>
+  <h1>Choose a match</h1>
+  <p class="path"><strong>File:</strong> {{ filepath }}</p>
+  {% if message %}<p class="notice">{{ message }}</p>{% endif %}
+  {% if error %}<p class="error">{{ error }}</p>{% endif %}
+  {% if current_match %}
+    <p class="muted">Saved match: {{ current_match.title }} ({{ current_match.provider_id }})</p>
+  {% endif %}
+
+  <form action="/search" method="post">
+    <input type="hidden" name="filepath" value="{{ filepath }}">
+    <label for="query">Search title</label><br>
+    <input id="query" name="query" type="text" value="{{ query }}" required>
+    <button type="submit">Search ThePornDB (scenes and movies)</button>
+  </form>
+
+  {% if candidates %}
+    <h2>Search results</h2>
+    {% for candidate in candidates %}
+      <section class="candidate">
+        <p class="muted">{{ candidate.media_type }}</p>
+        <h3>{{ candidate.title }}{% if candidate.year %} ({{ candidate.year }}){% endif %}</h3>
+        {% if candidate.studio %}<p class="muted">{{ candidate.studio }}</p>{% endif %}
+        {% if candidate.url %}<p><a href="{{ candidate.url }}" target="_blank" rel="noopener noreferrer">View on ThePornDB</a></p>{% endif %}
+        <form action="/select" method="post">
+          <input type="hidden" name="filepath" value="{{ filepath }}">
+          <input type="hidden" name="provider_id" value="{{ candidate.provider_id }}">
+          <input type="hidden" name="media_type" value="{{ candidate.media_type }}">
+          <input type="hidden" name="title" value="{{ candidate.title }}">
+          <label>
+            <input type="checkbox" name="refresh" value="true" {% if jellyfin_configured %}checked{% endif %}>
+            Request a Jellyfin library refresh after saving
+          </label><br>
+          <button type="submit">Use this match</button>
+        </form>
+      </section>
+    {% endfor %}
+  {% endif %}
+</body>
+</html>

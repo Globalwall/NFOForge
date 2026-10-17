@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Jellyfin NFO Matcher</title>
+  <style>
+    body { max-width: 960px; margin: 2rem auto; padding: 0 1rem; font: 16px/1.5 system-ui, sans-serif; }
+    h1 { margin-bottom: .25rem; }
+    .muted { color: #555; }
+    li { margin: .65rem 0; overflow-wrap: anywhere; }
+    .matched { color: #176b35; }
+    input[type="search"] { box-sizing: border-box; padding: .5rem; width: min(100%, 32rem); }
+  </style>
+</head>
+<body>
+  <h1>Jellyfin NFO Matcher</h1>
+  <p class="muted">Media roots: {% for root in roots %}<code>{{ root }}</code>{% if not loop.last %}, {% endif %}{% endfor %}</p>
+  <p id="media-count" aria-live="polite">{{ files|length }} video file(s) found.</p>
+  {% if files %}
+    <label for="media-filter">Search media</label><br>
+    <input id="media-filter" type="search" placeholder="Filter by filename or saved match" autocomplete="off">
+    <ul>
+      {% for file in files %}
+        {% set saved = matches.get(file|string) %}
+        <li data-search="{{ file }}{% if saved %} {{ saved.title }}{% endif %}">
+          <a href="/match?filepath={{ file|string|urlencode }}">{{ file }}</a>
+          {% if saved %}
+            <span class="matched">— matched: {{ saved.title }} ({{ saved.provider_id }})</span>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+    <p id="no-media-results" hidden>No media matches your search.</p>
+  {% else %}
+    <p>No videos found. Check that MEDIA_ROOTS points to a mounted media folder.</p>
+  {% endif %}
+  <script>
+    const mediaFilter = document.getElementById("media-filter");
+    if (mediaFilter) {
+      const mediaItems = [...document.querySelectorAll("li[data-search]")];
+      const mediaCount = document.getElementById("media-count");
+      const noResults = document.getElementById("no-media-results");
+      const total = mediaItems.length;
+
+      mediaFilter.addEventListener("input", () => {
+        const query = mediaFilter.value.trim().toLocaleLowerCase();
+        let visible = 0;
+        for (const item of mediaItems) {
+          const matches = item.dataset.search.toLocaleLowerCase().includes(query);
+          item.hidden = !matches;
+          if (matches) visible += 1;
+        }
+        mediaCount.textContent = `Showing ${visible} of ${total} video file(s).`;
+        noResults.hidden = visible !== 0;
+      });
+    }
+  </script>
+</body>
+</html>

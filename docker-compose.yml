@@ -1,0 +1,15 @@
+services:
+  nfo-matcher:
+    build: .
+    container_name: nfo-matcher
+    ports:
+      - "2026:8080"
+    environment:
+      MEDIA_ROOTS: /media
+      THEPORNDB_API_KEY: ${THEPORNDB_API_KEY:-}
+      JELLYFIN_URL: ${JELLYFIN_URL:-}
+      JELLYFIN_API_KEY: ${JELLYFIN_API_KEY:-}
+    volumes:
+      - ./data:/app/data
+      - ${MEDIA_PATH:-./media}:/media
+    restart: unless-stopped
