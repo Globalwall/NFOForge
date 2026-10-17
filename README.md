@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Jellyfin ID-Only NFO Matcher
 
 A small self-hosted web app for scanning video files, finding a manual match in ThePornDB, writing an ID-only NFO, and storing the match in SQLite. A Jellyfin library refresh can be requested after saving.
@@ -69,4 +68,3 @@ python -m unittest discover -s tests
 =======
 # NFOForge
 NFOForge scans your media library, matches files to metadata providers, and generates lightweight ID-based NFO files for Jellyfin. Eliminate manual Identify searches, preserve matches across server rebuilds, and let Jellyfin automatically fetch metadata, artwork, cast information, and more.
->>>>>>> bca6b1bb9f01facda6f354922ff3022085a5a9ca
